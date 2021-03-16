@@ -1,0 +1,56 @@
+service:
+  name: sls-project
+
+# we also have plugin for typescript
+plugins:
+  - serverless-bundle
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'} # if option stage is not defined, it is dev
+  region: eu-west-1 # as our region we configured in aws cli
+  environment:
+    AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
+  iamRoleStatements:
+    - ${file(iam/AuctionsTableIAM.yaml):AuctionsTableIAM}
+
+# resources we wanna use in the app
+resources:
+  Resources: # This is a special cloud formation language, created by aws, to use aws resources
+    AuctionsTable: ${file(resources/AuctionsTableResources.yml):AuctionsTable}
+
+functions:
+  createAuction:
+    handler: src/handlers/createAuction.handler
+    events:
+      - http:
+          method: POST
+          path: /auction
+  getAuctions:
+    handler: src/handlers/getAuctions.handler
+    events:
+      - http:
+          method: GET
+          path: /auctions
+  getAuction:
+    handler: src/handlers/getAuction.handler
+    events:
+      - http:
+          method: GET
+          path: /auction/{id}
+  placeBid:
+    handler: src/handlers/placeBid.handler
+    events:
+      - http:
+          method: PATCH
+          path: /auction/{id}/bid
+
+custom:
+  AuctionsTable:
+    name: !Ref AuctionsTable # Ref returns table name , AuctionsTable is the resource name here
+    arn: !GetAtt AuctionsTable.Arn # GetAtt will return actual arn of the resource
+  bundle:
+    linting: false

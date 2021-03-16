@@ -1,0 +1,11 @@
+download aws cli , serverless cli
+create IAM root user with programmatic access and other access
+do aws configure , and use region eu-west-1 for now 
+
+for template 
+https://github.com/codingly-io/sls-base
+
+sls deploy -v -> v stands for verbose
+sls remove -v -> to stop deploy
+
+sls deploy -f [functionName_like_createAuction] -v -> -f for function 
