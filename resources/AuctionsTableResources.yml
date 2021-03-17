@@ -1,11 +1,25 @@
 AuctionsTable: # name, we specify for this resource
-      Type: AWS::DynamoDB::Table
-      Properties: 
-        TableName: AuctionsTable # any name for the table 
-        BillingMode: PAY_PER_REQUEST
-        AttributeDefinitions: 
-          - AttributeName: id
-            AttributeType: S # S stands for string here
-        KeySchema: 
-          - AttributeName: id 
+  Type: AWS::DynamoDB::Table
+  Properties:
+    TableName: AuctionsTable # any name for the table
+    BillingMode: PAY_PER_REQUEST
+    AttributeDefinitions: # these are the attributes, we could use for queries
+      - AttributeName: id
+        AttributeType: S # S stands for string here
+      - AttributeName: status
+        AttributeType: S # S stands for string here
+      - AttributeName: endingAt
+        AttributeType: S # S stands for string here
+    KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+    GlobalSecondaryIndexes: # dynamodb will create a virtual copy of the table and we will be able to query based on the attributes
+      # we could retrieve dynamodb data by querying with status and ending date
+      - IndexName: statusAndEndDate
+        KeySchema:
+          - AttributeName: status
             KeyType: HASH
+          - AttributeName: endingAt
+            KeyType: RANGE
+        Projection: # it will tell that which attributes dynamodb need to have on the table
+          ProjectionType: ALL

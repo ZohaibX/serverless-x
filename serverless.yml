@@ -1,5 +1,4 @@
-service:
-  name: sls-project
+service: sls-project # service name
 
 # we also have plugin for typescript
 plugins:
@@ -9,13 +8,18 @@ plugins:
 provider:
   name: aws
   runtime: nodejs12.x
+  apiGateway:
+    shouldStartNameWithService: true
+  lambdaHashingVersion: '20201221'
   memorySize: 256
   stage: ${opt:stage, 'dev'} # if option stage is not defined, it is dev
   region: eu-west-1 # as our region we configured in aws cli
   environment:
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
-  iamRoleStatements:
-    - ${file(iam/AuctionsTableIAM.yaml):AuctionsTableIAM}
+  iam:
+    role:
+      statements:
+        - ${file(iam/AuctionsTableIAM.yaml):AuctionsTableIAM}
 
 # resources we wanna use in the app
 resources:
@@ -47,6 +51,11 @@ functions:
       - http:
           method: PATCH
           path: /auction/{id}/bid
+  processAuctions:
+    handler: src/handlers/processAuctions.handler
+    # events: # we are using AWS EventBridge for this service
+    #   - schedule: rate(1 minute) # will run this for every minute
+    # we will uncomment the upper lines on production mode -- till, we will invoke processAuctions manually
 
 custom:
   AuctionsTable:
