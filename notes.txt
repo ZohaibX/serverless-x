@@ -1,19 +1,7 @@
-download aws cli , serverless cli
-create IAM root user with programmatic access and other access
-do aws configure , and use region eu-west-1 for now 
+Uploading Images with s3 in serverless is easy but not done here yet
 
-for template 
-https://github.com/codingly-io/sls-base
+Udemy Course - Serverless Framework course by Ariel Weinberger
+Last 2 sections are not done here that includes image uploading with s3 
+and a frontend demo to connect with serverless app 
 
-sls deploy -v -> v stands for verbose
-sls remove -v -> to stop deploy
-
-sls deploy -f [functionName_like_createAuction] -v -> -f for function 
-
-
-sls logs -f [function_name] -t -> new logs 
-sls logs -f [function_name] -> All the logs 
-sls logs -f [function_name] --startTime 1m -> all the logs from 1 minute ago
-sls logs -f [function_name] --startTime 1h -> all the logs from 1 hour ago
-
-sls invoke -f [function_name] -l -> to invoke functions manually -> working in cmd 
+both are easy and could be done anytime 

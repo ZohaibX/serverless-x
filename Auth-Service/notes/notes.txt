@@ -1,0 +1,28 @@
+go to Auth0 account 
+
+go to applications -> create one 
+go to settings of the created application
+
+Allowed CallBack Urls , logout urls and web origins 
+add http://localhost:3000 or production frontend host 
+
+go to -> show advanced settings -> grant types and select password 
+and save changes 
+
+then go to the profile icon and then settings - Tenant Settings 
+Scroll down and make sure
+API Authorization Settings -> Default Directory says Username-Password-Authentication
+
+
+now go to user and roles in sidebar 
+users
+create a user 
+connection name should be Username-Password-Authentication
+
+
+sls create --name auth-service --template-url https://github.com/codingly-io/serverless-auth0-authorizer
+
+
+after creating project 
+create secret.pem file and include it in .gitignore
+copy certificate from Auth0 -> applications -> settings -> advanced settings -> certificates

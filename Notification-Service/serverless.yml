@@ -1,0 +1,54 @@
+service: Notification-Service
+
+plugins:
+  - serverless-bundle
+  - serverless-pseudo-parameters
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  apiGateway:
+    shouldStartNameWithService: true
+  lambdaHashingVersion: '20201221'
+  region: eu-west-1 # as our region we configured in aws cli
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  iam:
+    role:
+      statements:
+        - ${file(iam/sendMailIAM.yml):SendMailIAM}
+        - ${file(iam/mailQueueIAM.yml):MailQueueIAM}
+
+resources:
+  Resources:
+    MailQueue: ${file(resources/mailQueue.yml):MailQueue}
+  Outputs:
+    MailQueueArn: ${file(resources/mailQueue.yml):Outputs.MailQueueArn}
+    MailQueueUrl: ${file(resources/mailQueue.yml):Outputs.MailQueueUrl}
+
+functions:
+  sendMail:
+    handler: src/handlers/sendMail.handler
+    events:
+      - sqs:
+          arn: ${self:custom.mailQueue.arn}
+          batchSize: 1 # 1 is only for dev env -- by default, it is 10 -- which is maximum too
+  test:
+    handler: src/handlers/test.handler
+    events:
+      - http:
+          method: GET
+          path: /test
+          authorizer: ${self:custom.authorizer} # commented for testing
+
+custom:
+  authorizer:
+    arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:Auth-Service-${self:provider.stage}-auth
+    # keep in mind -- auth and auction service should be created by same aws account -- otherwise we would have to deal with some other way
+    # go to cloudFormation -> stacks -> auth-service -> resources -> search for lambda -> select AuthLambdaFunction -> then, copy arn and paste here in authorizer
+  mailQueue:
+    name: MailQueue-${self:provider.stage}
+    arn: !GetAtt MailQueue.Arn
+    url: !Ref MailQueue
+  bundle:
+    linting: false

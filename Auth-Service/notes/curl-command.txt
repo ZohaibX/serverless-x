@@ -1,0 +1,17 @@
+curl --location --request POST 'https://developers-123.eu.auth0.com/oauth/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'client_id=NbaYDecOsT7QK83hcY2F2g9EMHTJRI9N' \
+--data-urlencode 'username=zohaibbutt283@gmail.com' \
+--data-urlencode 'password=Iqrabutt123' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'scope=openid' 
+
+
+After following application and user creation:
+curl --location --request POST 'https://YOUR_DOMAIN_FROM_AUTH0_APP/oauth/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'client_id=CLIENT_ID' \
+--data-urlencode 'username=USERNAME' \
+--data-urlencode 'password=PASSWORD' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'scope=openid' 

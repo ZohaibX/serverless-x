@@ -1,0 +1,3 @@
+go to SES in aws
+email addresses in the sidebar
+verify your email address

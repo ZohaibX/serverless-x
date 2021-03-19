@@ -11,6 +11,8 @@ async function placeBid(event, context) {
   const { id } = event.pathParameters;
   const { amount } = event.body;
 
+  const { email } = event.requestContext.authorizer; // we have user data here
+
   const auction = await getAuctionById(id); // checking if auction exist -- will handle errors too
 
   if (auction.status !== 'OPEN')
@@ -21,11 +23,20 @@ async function placeBid(event, context) {
       `Your bid must be greater than ${auction.highestBid.amount}`
     );
 
+  // seller cannot bid on his own auction
+  if (email === auction.seller)
+    throw new createError.Forbidden('You cannot bid on your own auction');
+
+  // highest bidder cannot bid 2 times
+  if (email === auction.highestBid.bidder)
+    throw new createError.Forbidden(`You are already a higher bidder`);
+
   const params = {
     TableName: process.env.AUCTIONS_TABLE_NAME,
     Key: { id },
-    UpdateExpression: 'set highestBid.amount = :amount', // set is a keyword
-    ExpressionAttributeValues: { ':amount': amount },
+    UpdateExpression:
+      'set highestBid.amount = :amount, highestBid.bidder = :bidder', // set is a keyword
+    ExpressionAttributeValues: { ':amount': amount, ':bidder': email },
     ReturnValues: 'ALL_NEW', // will return the item
   };
 

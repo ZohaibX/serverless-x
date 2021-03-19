@@ -1,0 +1,1 @@
+every request will come here with an already generated bearer token and then, this service will authorize the token 

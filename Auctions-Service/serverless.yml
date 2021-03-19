@@ -16,10 +16,12 @@ provider:
   region: eu-west-1 # as our region we configured in aws cli
   environment:
     AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
+    MAIL_QUEUE_URL: ${self:custom.MailQueue.url} # do it when mailing srv is configured
   iam:
     role:
       statements:
         - ${file(iam/AuctionsTableIAM.yaml):AuctionsTableIAM}
+        - ${file(iam/mailQueueIAM.yaml):MailQueueIAM}
 
 # resources we wanna use in the app
 resources:
@@ -33,24 +35,28 @@ functions:
       - http:
           method: POST
           path: /auction
+          authorizer: ${self:custom.authorizer} # commented for testing
   getAuctions:
     handler: src/handlers/getAuctions.handler
     events:
       - http:
           method: GET
           path: /auctions
+          authorizer: ${self:custom.authorizer} # commented for testing
   getAuction:
     handler: src/handlers/getAuction.handler
     events:
       - http:
           method: GET
           path: /auction/{id}
+          authorizer: ${self:custom.authorizer} # commented for testing
   placeBid:
     handler: src/handlers/placeBid.handler
     events:
       - http:
           method: PATCH
           path: /auction/{id}/bid
+          authorizer: ${self:custom.authorizer} # commented for testing
   processAuctions:
     handler: src/handlers/processAuctions.handler
     # events: # we are using AWS EventBridge for this service
@@ -58,8 +64,15 @@ functions:
     # we will uncomment the upper lines on production mode -- till, we will invoke processAuctions manually
 
 custom:
+  authorizer:
+    arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:Auth-Service-${self:provider.stage}-auth
+    # keep in mind -- auth and auction service should be created by same aws account -- otherwise we would have to deal with some other way
+    # go to cloudFormation -> stacks -> auth-service -> resources -> search for lambda -> select AuthLambdaFunction -> then, copy arn and paste here in authorizer
   AuctionsTable:
     name: !Ref AuctionsTable # Ref returns table name , AuctionsTable is the resource name here
     arn: !GetAtt AuctionsTable.Arn # GetAtt will return actual arn of the resource
+  MailQueue: # # do it when mailing srv is configured
+    arn: ${cf:Notification-Service-${self:provider.stage}.MailQueueArn}
+    url: ${cf:Notification-Service-${self:provider.stage}.MailQueueUrl}
   bundle:
     linting: false
